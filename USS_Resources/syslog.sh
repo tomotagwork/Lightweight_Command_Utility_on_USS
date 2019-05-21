@@ -85,7 +85,7 @@ getRelativeTime(){
 	var=$1
 
 	if [[ ${thisMinute} -ge ${var} ]] ; then
-		min=$((thisMinute-var))
+		min=$(expr ${thisMinute} - ${var})
 		if [[ ${min} -lt 10 ]] ; then
 			min=0${min}
 		fi
@@ -94,12 +94,12 @@ getRelativeTime(){
 		if [[ ${thisHour} -eq 0 ]] ; then
 			result=00:00:00
 		else
-			hour=$((thisHour-1))
+			hour=$(expr ${thisHour} - 1)
 			if [[ ${hour} -lt 10 ]]; then
 				hour=0${hour}
 			fi
 
-			min=$((60+thisMinute-var))
+			min=$(expr 60 + ${thisMinute} - ${var})
 			if [[ ${min} -lt 10 ]] ; then
 				min=0${min}
 			fi
@@ -126,6 +126,7 @@ thisDay=${arrayDateTime[2]}
 thisHour=${arrayDateTime[3]}
 thisMinute=${arrayDateTime[4]}
 thisSecond=${arrayDateTime[5]}
+
 
 #echo ${thisHour}:${thisMinute}:${thisSecond}
 
