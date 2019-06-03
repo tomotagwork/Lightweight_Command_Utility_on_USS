@@ -6,12 +6,13 @@ rexxFile=st.rex
 ######################################
 # Function
 ######################################
+. commonFunctions.sh
 
 showHelp(){
-	echo "Usage: ${scriptName} [-j jobname] [-o owner] [-p]"
+	echo "Usage: ${scriptName} [-j jobname] [-o owner] [-i]"
 	echo "  -j: jobname filter (pertial match)"
 	echo "  -o: owner filter (partial mathc)"
-	echo "  -p: prompt mode"
+	echo "  -i: interactive mode"
 	exit 0
 }
 
@@ -28,37 +29,6 @@ showSubCommandHelp(){
 
 }
 
-checkOption(){
-	# result: 0=false, other=true
-        var=$1
-
-        if [[ "${var}" = "-" ]]; then
-                result=1
-
-        elif [[ $(expr "${var}" : "\-") -ne 0 ]] ; then
-                result=1
-
-        else
-                result=0
-        fi
-
-        echo ${result}
-
-}
-
-checkNumber(){
-	# result: 0=false, other=true
-	var=$1
-
-	if expr "${var}" : "[0-9]*$" >/dev/null ;then
-		result=1
-	else
-		result=0
-	fi
-
-	echo ${result}
-
-}
 
 getJOBIDList(){
 
@@ -96,7 +66,7 @@ tempFile=${tempDir}/${tempKey}_${pid}_${thisDateTime}.txt
 
 arg_j=
 arg_o=
-flag_p=0
+flag_i=0
 
 for option in "$@"
 do
@@ -125,8 +95,8 @@ do
 			arg_o="$2"
 			shift 2
 			;;
-		'-p')
-			flag_p=1
+		'-i')
+			flag_i=1
 			shift 1
 			;;
 		-*)
@@ -147,12 +117,12 @@ arg_o=$(echo ${arg_o} | tr "a-z" "A-Z")
 
 #echo arg_j: ${arg_j}
 #echo arg_o: ${arg_o}
-#echo flag_p: ${flag_p}
+#echo flag_i: ${flag_i}
 
 #${rexxFile} -j=${arg_j} -o=${arg_o}
 
 ### Normal Mode
-if [[ ${flag_p} = 0 ]]; then
+if [[ ${flag_i} = 0 ]]; then
 	${rexxFile} -j=${arg_j} -o=${arg_o}
 	exit 0
 
