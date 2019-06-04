@@ -299,6 +299,10 @@ if [[ ${flag_w} -eq 1 ]]; then
 		toTime=$(date '+%T')
 		
 		${rexxFile} ${fromDate} ${fromTime}.01 ${toDate} ${toTime}.00
+		rc=$?
+		if [[ ${rc} -ne 0 ]]; then
+			exit ${rc}
+		fi
 
 		sleep ${arg_w}
 
