@@ -8,7 +8,7 @@ scriptName=$(basename $0)
 . commonFunctions.sh
 
 showHelp(){
-	echo "Usage: ${scriptName} [-f <jcl_file> | -d <jcl_dataset>] [-i|-s] [-t <timeout>] [-p <propertyFile>]"
+	echo "Usage: ${scriptName} [-f <jcl_file> | -d <jcl_dataset>] [-i|-s] [-t <timeout>] [-p <propertyFile> | -l <propertyList>]"
 	echo " -f : specify uss file "
 	echo " -d : specify PDS member"
 	echo " -i : interactive mode to display JOBLOG"
@@ -17,9 +17,11 @@ showHelp(){
 	echo "       default 0 sec (no timeout) / speciry between 0 to 3600"
 	echo " -p : specify property file name on USS"
 	echo "       (prop01=XXX in property file means replacement from @prop01@ to XXX in JCL)"
+	echo " -l : specify property list instead of file in following format: prop01=XXX,bbb=YYY,ccc=ZZZ "
 	echo " "
 	echo "  Example1: ${scriptName} -f sleep.jcl"  
 	echo "  Example2: ${scriptName} -d 'CICSSHR.CICS004.JCLLIB(LISTC)'"
+	echo "  Example3: ${scriptName} -f template.jcl -l \"prop01=XXX,prop02=YYY\""
 	echo ""
 	exit 1
 }
@@ -92,6 +94,28 @@ createSedCommand(){
 
 }
 
+createSedCommand2(){
+	# arg1: property list delimitted by comma (ex. parm1=xxx,parm2=yyy,parm3=zzz)
+	propertyList=$1
+
+	set -A arrayPropertyList $(echo ${propertyList} | tr -s "," " ")
+
+	unset arrayPropertyName
+	unset arrayPropertyValue
+
+	commandString="sed"
+	idx=0
+	while [[ ${idx} -lt ${#arrayPropertyList[@]} ]]
+	do
+		set -A keyValue $(echo ${arrayPropertyList[${idx}]} | tr -s "=" " ")	
+		propertyName=${keyValue[0]}
+		propertyValue=${keyValue[1]}
+		commandString="${commandString} -e s/@${propertyName}@/${propertyValue}/g"
+		idx=$((idx+1))
+	done
+	
+	echo ${commandString}
+}
 
 #######################################
 # Main Logic
@@ -107,6 +131,8 @@ arg_t=0
 flag_t=0
 flag_p=0
 arg_p=
+flag_l=0
+arg_l=
 
 for option in "$@"
 do
@@ -194,7 +220,11 @@ do
 			;;	
 		'-p')
 			flag_p=1
-			if [[ -z "$2" ]] || [[ $(checkOption "$2") -ne 0 ]] ; then
+			if [[ ${flag_l} != 0 ]] ; then
+				echo "Error: Can not specify both -p and -l option."
+				showHelp
+				exit 1
+			elif [[ -z "$2" ]] || [[ $(checkOption "$2") -ne 0 ]] ; then
 				echo "Error: Argument is required for -p"
 				showHelp
 				exit 1
@@ -204,6 +234,21 @@ do
 				exit 1
 			else
 				arg_p=$2
+				shift 2
+			fi
+			;;
+		'-l')
+			flag_l=1
+			if [[ ${flag_p} != 0 ]] ; then
+				echo "Error: Can not specify both -p and -l option."
+				showHelp
+				exit 1
+			elif [[ -z "$2" ]] || [[ $(checkOption "$2") -ne 0 ]] ; then
+				echo "Error: Argument is required for -l"
+				showHelp
+				exit 1
+			else
+				arg_l=$2
 				shift 2
 			fi
 			;;
@@ -231,6 +276,8 @@ done
 #echo flag_t: ${flag_t}
 #echo flag_p: ${flag_p}
 #echo arg_p: ${arg_p}
+echo flag_l: ${flag_l}
+echo arg_l: ${arg_l}
 
 
 if [[ ${flag_f} -ne 0 ]]; then
@@ -240,7 +287,7 @@ elif [[ ${flag_d} -ne 0 ]]; then
 	jclName="//'${arg_d}'"
 
 else
-	echo "Invalid option"
+	echo "Error: Please specify JCL using -f or -d option."
 	showHelp
 	exit 0
 
@@ -250,6 +297,10 @@ fi
 if [[ ${flag_p} -ne 0 ]]; then
 	sedCommand=$(createSedCommand ${arg_p})
 	#echo sedCommand: ${sedCommand}
+	JobID=$(cat ${jclName} | ${sedCommand} | submit -j)
+	rc=$?
+elif [[ ${flag_l} -ne 0 ]]; then
+	sedCommand=$(createSedCommand2 ${arg_l})
 	JobID=$(cat ${jclName} | ${sedCommand} | submit -j)
 	rc=$?
 else

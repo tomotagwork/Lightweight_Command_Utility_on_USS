@@ -25,9 +25,9 @@ do ix=1 to JOBID.0
       say "OWNER:   "||OWNERID.ix
       say "-----------------------"
 
-      header = fixWidth("No.",5)||fixWidth("DDNAME",10)||fixWidth("StepName",10)||fixWidth("DSID",5)||fixWidth("Owner",10)||fixWidth("Rec-Cnt",10)||fixWidth("Byte-cnt",10)||fixWidth("CrDate-CrTime",20)
+      header = fixWidth("No.",5)||fixWidth("DDNAME",10)||fixWidth("StepName",10)||fixWidth("ProcStep",10)||fixWidth("DSID",5)||fixWidth("Owner",10)||fixWidth("Rec-Cnt",10)||fixWidth("Byte-cnt",10)||fixWidth("CrDate-CrTime",20)
       say header
-      say "=============================================================================="
+      say "========================================================================================"
 
       /*****************************************/                               
       /* Issue the ? (JDS) action against the  */                               
@@ -46,7 +46,7 @@ do ix=1 to JOBID.0
       isflinelim = 500
       do jx=1 to jds_DDNAME.0
         /* say JNAME.ix||"_"||jds_DDNAME.jx JOBID.ix||"."||jds_DSName.jx  */
-        line = fixWidth(jx,5)||fixWidth(jds_DDNAME.jx,10)||fixWidth(jds_STEPN.jx,10)||fixWidth(jds_DSID.jx,5)||fixWidth(jds_OWNERID.jx,10)
+        line = fixWidth(jx,5)||fixWidth(jds_DDNAME.jx,10)||fixWidth(jds_STEPN.jx,10)||fixWidth(jds_PROCS.jx,10)||fixWidth(jds_DSID.jx,5)||fixWidth(jds_OWNERID.jx,10)
         line = line||fixWidth(jds_RECCNT.jx,10)||fixWidth(jds_BYTECNT.jx,10)||fixWidth(jds_DSDATE.jx,20)
         say line
       end
