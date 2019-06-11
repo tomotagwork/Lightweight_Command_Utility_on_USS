@@ -276,8 +276,8 @@ done
 #echo flag_t: ${flag_t}
 #echo flag_p: ${flag_p}
 #echo arg_p: ${arg_p}
-echo flag_l: ${flag_l}
-echo arg_l: ${arg_l}
+#echo flag_l: ${flag_l}
+#echo arg_l: ${arg_l}
 
 
 if [[ ${flag_f} -ne 0 ]]; then
@@ -357,6 +357,19 @@ do
 		break
 	fi
 done
+
+#retry to get Retcode if 
+if [[ isTimeOut -eq 0 ]]; then
+	if [[ "${Retcode}" = "" ]]; then
+		result=$(checkJobStatus.rex ${JobID})
+		IFS=","
+		set -- ${result}
+		JobName=$1
+		Queue=$3
+		Retcode=$4
+		echo debug: ${JobName} ${Queue} ${Retcode}
+	fi
+fi
 
 if [[ ${flag_i} -ne 0 ]]; then
 	joblog.sh ${JobID}

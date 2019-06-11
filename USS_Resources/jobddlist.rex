@@ -23,6 +23,7 @@ do ix=1 to JOBID.0
       say "JOBNAME: "||JNAME.ix
       say "JOBID:   "||JOBID.ix
       say "OWNER:   "||OWNERID.ix
+      say "Max-RC:  "||RETCODE.ix
       say "-----------------------"
 
       header = fixWidth("No.",5)||fixWidth("DDNAME",10)||fixWidth("StepName",10)||fixWidth("ProcStep",10)||fixWidth("DSID",5)||fixWidth("Owner",10)||fixWidth("Rec-Cnt",10)||fixWidth("Byte-cnt",10)||fixWidth("CrDate-CrTime",20)

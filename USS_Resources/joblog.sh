@@ -45,7 +45,7 @@ getDDList(){
 		if [[ "${lineArray[0]}" = "JOBNAME:" ]] ; then
 			JOBNAME=${lineArray[1]}
 		fi
-		if [[ ${line_cnt} -ge 7 ]] ; then
+		if [[ ${line_cnt} -ge 8 ]] ; then
 			#echo ${idx}: ${line}
 			arrayDD[${idx}]=${lineArray[1]}
 			idx=$((idx+1))
@@ -60,7 +60,7 @@ getDDList(){
 ################################################
 
 tempDir=/tmp
-tempKey=Util_
+tempKey=Util
 
 if [ $# -lt 1 ]; then
         echo "Usage:"
