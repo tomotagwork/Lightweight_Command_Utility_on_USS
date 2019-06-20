@@ -340,7 +340,7 @@ do
 	Retcode=$4
 	#echo debug: ${JobName} ${Queue} ${Retcode}
 
-	if [[ ${Queue} = "" ]] || [[ ${Queue} = "EXECUTION" ]] ; then
+	if [[ "${Retcode}" = "" ]] ; then
 		if [[ ${arg_t} -gt 0 ]]; then 
 			if [[ $(checkTimeout ${startTime} ${arg_t}) -ne 0 ]]; then
 				echo ""
@@ -358,18 +358,6 @@ do
 	fi
 done
 
-#retry to get Retcode if 
-if [[ isTimeOut -eq 0 ]]; then
-	if [[ "${Retcode}" = "" ]]; then
-		result=$(checkJobStatus.rex ${JobID})
-		IFS=","
-		set -- ${result}
-		JobName=$1
-		Queue=$3
-		Retcode=$4
-		echo debug: ${JobName} ${Queue} ${Retcode}
-	fi
-fi
 
 if [[ ${flag_i} -ne 0 ]]; then
 	joblog.sh ${JobID}
