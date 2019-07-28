@@ -16,12 +16,13 @@ showHelp(){
 	echo " -t : timeout in sec for waiting JOB completion "
 	echo "       default 0 sec (no timeout) / speciry between 0 to 3600"
 	echo " -p : specify property file name on USS"
-	echo "       (prop01=XXX in property file means replacement from @prop01@ to XXX in JCL)"
-	echo " -l : specify property list instead of file in following format: prop01=XXX,bbb=YYY,ccc=ZZZ "
+	echo "       (@prop01@=XXX in property file means replacement from @prop01@ to XXX in JCL)"
+	echo " -l : specify property list instead of file in following format: @prop01@=XXX,@bbb@=YYY,@ccc@=ZZZ "
+	echo " -c : check JCL before submit"
 	echo " "
 	echo "  Example1: ${scriptName} -f sleep.jcl"  
 	echo "  Example2: ${scriptName} -d 'CICSSHR.CICS004.JCLLIB(LISTC)'"
-	echo "  Example3: ${scriptName} -f template.jcl -l \"prop01=XXX,prop02=YYY\""
+	echo "  Example3: ${scriptName} -f template.jcl -l \"@prop01@=XXX,@prop02@=YYY\""
 	echo ""
 	exit 1
 }
@@ -87,7 +88,7 @@ createSedCommand(){
 	do
 		propertyName=$(echo ${line} | cut -f 1 -d =)
 		propertyValue=$(echo ${line} | cut -f 2 -d =)
-		commandString="${commandString} -e s/@${propertyName}@/${propertyValue}/g"
+		commandString="${commandString} -e s/${propertyName}/${propertyValue}/g"
 	done<${propertyFile}
 
 	echo ${commandString}
@@ -110,11 +111,26 @@ createSedCommand2(){
 		set -A keyValue $(echo ${arrayPropertyList[${idx}]} | tr -s "=" " ")	
 		propertyName=${keyValue[0]}
 		propertyValue=${keyValue[1]}
-		commandString="${commandString} -e s/@${propertyName}@/${propertyValue}/g"
+		commandString="${commandString} -e s/${propertyName}/${propertyValue}/g"
 		idx=$((idx+1))
 	done
 	
 	echo ${commandString}
+}
+
+checkJcl(){
+	if [[ ${sedCommand} != "" ]]; then
+		cat ${jclName} | ${sedCommand} | more
+	else
+		cat ${jclName} | more
+	fi
+	read answer?"Submit JCL? (y/n) >>>"
+	if [[ "${answer}" = "y" ]] ; then
+		# do nothing (go to next step)
+	else
+		echo "Canceled!"
+		exit 
+	fi
 }
 
 #######################################
@@ -133,6 +149,7 @@ flag_p=0
 arg_p=
 flag_l=0
 arg_l=
+flag_c=0
 
 for option in "$@"
 do
@@ -194,6 +211,20 @@ do
 			flag_s=1
 			if [[ ${flag_i} != 0 ]] ; then
 				echo "Error: Can not specify both -i and -s option."
+				showHelp
+				exit 1
+			fi
+			if [[ ${flag_c} != 0 ]] ; then
+				echo "Error: Can not specify both -c and -s option."
+				showHelp
+				exit 1
+			fi
+			shift 1
+			;;
+		'-c')
+			flag_c=1
+			if [[ ${flag_s} != 0 ]] ; then
+				echo "Error: Can not specify both -c and -s option."
 				showHelp
 				exit 1
 			fi
@@ -278,6 +309,7 @@ done
 #echo arg_p: ${arg_p}
 #echo flag_l: ${flag_l}
 #echo arg_l: ${arg_l}
+#echo flag_c: ${flag_c}
 
 
 if [[ ${flag_f} -ne 0 ]]; then
@@ -294,16 +326,26 @@ else
 fi
 
 ### Submit JCL
+sedCommand=""
 if [[ ${flag_p} -ne 0 ]]; then
 	sedCommand=$(createSedCommand ${arg_p})
 	#echo sedCommand: ${sedCommand}
+	if [[ ${flag_c} -ne 0 ]]; then
+		checkJcl
+	fi
 	JobID=$(cat ${jclName} | ${sedCommand} | submit -j)
 	rc=$?
 elif [[ ${flag_l} -ne 0 ]]; then
 	sedCommand=$(createSedCommand2 ${arg_l})
+	if [[ ${flag_c} -ne 0 ]]; then
+		checkJcl
+	fi
 	JobID=$(cat ${jclName} | ${sedCommand} | submit -j)
 	rc=$?
 else
+	if [[ ${flag_c} -ne 0 ]]; then
+		checkJcl
+	fi
 	JobID=$(submit -j ${jclName})
 	rc=$?
 fi
