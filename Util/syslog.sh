@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 scriptName=$(basename $0)
 rexxFile=syslog.rex

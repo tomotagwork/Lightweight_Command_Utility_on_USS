@@ -432,7 +432,7 @@ do
 							if [[ ${rc} -ne 0 ]]; then
 								echo "Error: copy failed"
 							else
-								echo "Created new member ${dsName}(${memberName})"
+								echo "update member ${dsName}(${memberName})"
 							fi
 						else
 							echo "change is discarded"

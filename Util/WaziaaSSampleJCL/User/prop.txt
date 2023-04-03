@@ -1,0 +1,4 @@
+@user@=TEST01
+@homedir@=test01
+@uid@=100100
+

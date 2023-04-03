@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
 scriptName=$(basename $0)
-rexxFile=da.rex
+rexxFile=st.rex
 
 ######################################
 # Function
@@ -28,6 +28,7 @@ showSubCommandHelp(){
 	echo ""
 
 }
+
 
 getJOBIDList(){
 
@@ -138,7 +139,7 @@ showSubCommandHelp
 
 while true
 do
-	read myCommand?"DA: >> " var1
+	read myCommand?"ST: >> " var1
 
 	### quit this shell script
 	if [[ ${myCommand} = "quit" || ${myCommand} = "q" ]]; then

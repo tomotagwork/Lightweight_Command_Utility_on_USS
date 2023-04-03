@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 scriptName=$(basename $0)
 
@@ -79,6 +79,8 @@ checkDSexists(){
 createSedCommand(){
 	# arg1: property file
 	propertyFile=$1
+
+	chtag -r ${propertyFile}
 
 	unset arrayPropertyName
 	unset arrayPropertyValue
