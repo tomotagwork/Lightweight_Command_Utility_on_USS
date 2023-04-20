@@ -80,7 +80,7 @@ createSedCommand(){
 	# arg1: property file
 	propertyFile=$1
 
-	chtag -r ${propertyFile}
+	chtag -tc IBM-1047 ${propertyFile}
 
 	unset arrayPropertyName
 	unset arrayPropertyValue
